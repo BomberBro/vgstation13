@@ -277,8 +277,7 @@ var/list/virusdishes = list()
 /obj/item/weapon/virusdish/random/New(loc)
 	..(loc)
 	if (loc)//because fuck you /datum/subsystem/supply_shuttle/Initialize()
-		var/virus_choice = pick(subtypesof(/datum/disease2/disease))
-		contained_virus = new virus_choice
+		contained_virus = get_random_weighted_disease(WDISH)
 		var/list/anti = list(
 			ANTIGEN_BLOOD	= 1,
 			ANTIGEN_COMMON	= 1,
@@ -393,7 +392,9 @@ var/list/virusdishes = list()
 	if (open)//If the dish is open, we may get infected by the disease inside on top of those that might be stuck on it.
 		var/block = 0
 		var/bleeding = 0
-		if (src in perp.held_items)
+		if(attempt_colony(perp,contained_virus, "from exposure to \a [src]."))
+			//Spacesuits cover feet, torso, and hands, but are ideal for a colony.
+		else if (src in perp.held_items)
 			block = perp.check_contact_sterility(HANDS)
 			bleeding = perp.check_bodypart_bleeding(HANDS)
 			if (!block)

@@ -208,7 +208,7 @@
 				return
 
 		if(WALLCOVERREMOVED)
-			if(iswrench(W))
+			if(W.is_wrench(user))
 
 				user.visible_message("<span class='warning'>[user] starts loosening the bolts anchoring \the [src]'s external support rods.</span>", \
 				"<span class='notice'>You start loosening the bolts anchoring \the [src]'s external support rods.</span>")
@@ -266,7 +266,7 @@
 				return
 
 			//Repair step, tighten the anchoring bolts
-			else if(iswrench(W))
+			else if(W.is_wrench(user))
 
 				user.visible_message("<span class='notice'>[user] starts tightening the bolts anchoring \the [src]'s external support rods.</span>", \
 				"<span class='notice'>You start tightening the bolts anchoring \the [src]'s external support rods.</span>")
@@ -304,7 +304,7 @@
 			else if(iswelder(W))
 
 				var/obj/item/weapon/weldingtool/WT = W
-				if(WT.remove_fuel(0,user))
+				if(WT.remove_fuel(1,user))
 					user.visible_message("<span class='notice'>[user] begins mending \the [src]'s external support rods.</span>", \
 					"<span class='notice'>You begin mending \the [src]'s external support rods.</span>")
 					playsound(src, 'sound/items/Welder.ogg', 100, 1)
@@ -316,8 +316,7 @@
 						user.visible_message("<span class='warning'>[user] mends \the [src]'s external support rods.</span>", \
 						"<span class='notice'>You mend \the [src]'s external support rods.</span>")
 				else
-					to_chat(user, "<span class='notice'>You need more welding fuel to complete this task.</span>")
-				return
+					return
 
 //This is where we perform actions that aren't deconstructing, constructing or thermiting the reinforced wall
 

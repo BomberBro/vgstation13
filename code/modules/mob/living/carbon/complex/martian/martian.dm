@@ -1,5 +1,3 @@
-#define MARTIANS_AMBIDEXTROUS //Comment out to prevent martians from being able to do multiple do_afters at once
-
 //WORK IN PROGRESS - Martians (name may be changed)
 //Like octopuses but with 6 hands
 
@@ -68,20 +66,13 @@
 
 	..()
 
-#ifdef MARTIANS_AMBIDEXTROUS
-/mob/living/carbon/complex/martian/do_after_hand_check(held_item)
-	//Normally do_after breaks if you switch hands. With martians, it will only break if the used item is dropped
-	//This lets them do multiple things at once.
-	return (held_items.Find(held_item))
-#endif
-
 /mob/living/carbon/complex/martian/eyecheck()
 	var/obj/item/clothing/head/headwear = src.head
 	var/protection
 	if(headwear)
 		protection = headwear.eyeprot
 
-	return Clamp(protection, -2, 2)
+	return clamp(protection, -2, 2)
 
 /mob/living/carbon/complex/martian/can_be_infected()
 	return 1

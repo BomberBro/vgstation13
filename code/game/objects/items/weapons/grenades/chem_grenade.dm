@@ -19,6 +19,7 @@
 	var/extract_uses = 0
 	var/mob/primed_by = "N/A" //"name (ckey)". For logging purposes
 	mech_flags = null
+	det_time =0 //recycling this variable to be used by the grenade launcher's timer override function since chemnades use their assembly's timer instead.
 
 /obj/item/weapon/grenade/chem_grenade/attack_self(mob/user as mob)
 	if(!stage || stage==1)
@@ -98,7 +99,7 @@
 		user.before_take_item(src)
 		user.put_in_hands(E)
 		qdel(src)
-	else if(istype(W,/obj/item/weapon/screwdriver) && path != 2)
+	else if(W.is_screwdriver(user) && path != 2)
 		if(stage == 1)
 			path = 1
 			if(beakers.len)
@@ -194,6 +195,13 @@
 /obj/item/weapon/grenade/chem_grenade/activate(mob/user as mob)
 	if(active)
 		return
+
+	if(det_time != 0) //this can only ever be non-zero if fired from a grenade launcher with timer override toggled on... I think
+		spawn(det_time)
+			if(gcDestroyed)
+				return
+			prime(user)
+			active = 1
 
 	if(detonator)
 		if(!isigniter(detonator.a_left))
@@ -334,7 +342,7 @@ obj/item/weapon/grenade/chem_grenade/exgrenade/attackby(obj/item/weapon/W as obj
 		icon_state = initial(icon_state) +"_ass"
 		name = "unsecured EX grenade with [beakers.len] containers[detonator?" and detonator":""]"
 		stage = 1
-	else if(istype(W,/obj/item/weapon/screwdriver) && path != 2)
+	else if(W.is_screwdriver(user) && path != 2)
 		if(stage == 1)
 			path = 1
 			if(beakers.len)

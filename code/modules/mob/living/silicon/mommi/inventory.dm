@@ -5,6 +5,9 @@
 /mob/living/silicon/robot/mommi/get_active_hand()
 	return module_active
 
+/mob/living/silicon/robot/mommi/is_holding_item(item)
+	return get_active_hand() == item
+
 /mob/living/silicon/robot/mommi/get_all_slots()
 	return list(tool_state, head_state)
 
@@ -327,7 +330,3 @@
 			update_items()
 		else
 			to_chat(M, "<span class='warning'>You are unable to equip that.</span>")
-
-/mob/living/carbon/can_use_hands()
-	return TRUE
-

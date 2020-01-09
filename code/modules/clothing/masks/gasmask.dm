@@ -57,6 +57,7 @@
 	icon_state = "plaguedoctor"
 	item_state = "gas_mask"
 	armor = list(melee = 0, bullet = 0, laser = 2,energy = 2, bomb = 0, bio = 75, rad = 0)
+	body_parts_covered = FULL_HEAD | BEARD
 	species_fit = list(VOX_SHAPED)
 	can_flip = 0
 	canstage = 0
@@ -278,5 +279,14 @@
 	desc = "Twoooo!"
 	icon_state = "owl"
 	species_fit = list(VOX_SHAPED)
+	can_flip = 0
+	canstage = 0
+
+/obj/item/clothing/mask/gas/clownmaskpsyche
+	name = "clown psychedelic mask"
+	desc = "A true prankster's groovy facial attire. A clown is incomplete without his wig and mask."
+	icon_state = "clownmaskpsyche"
+	item_state = "clownmaskpsyche"
+	species_fit = list(VOX_SHAPED, GREY_SHAPED)
 	can_flip = 0
 	canstage = 0

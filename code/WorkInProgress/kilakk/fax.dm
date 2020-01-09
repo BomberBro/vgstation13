@@ -214,7 +214,7 @@ var/list/alldepartments = list("Central Command")
 			if(usr.drop_item(idcard, src))
 				scan = idcard
 
-	else if(iswrench(O))
+	else if(O.is_wrench(user))
 		playsound(loc, 'sound/items/Ratchet.ogg', 50, 1)
 		anchored = !anchored
 		to_chat(user, "<span class='notice'>You [anchored ? "wrench" : "unwrench"] \the [src].</span>")
@@ -267,11 +267,17 @@ proc/SendFax(var/sent, var/sentname, var/mob/Sender, var/dpt, var/centcomm, var/
 				if(centcomm)
 					CentcommStamp(P)
 
+
 				// give the sprite some time to flick
 				spawn(20)
 					P.forceMove(F.loc)
 
 				faxed = P //doesn't return here in case there's multiple faxes in the department
+	if(centcomm)
+		for(var/obj/item/device/pda/pingme in PDAs)
+			if(pingme.cartridge && pingme.cartridge.fax_pings)
+				playsound(pingme, "sound/effects/kirakrik.ogg", 50, 1)
+				pingme.visible_message("[bicon(pingme)] *Fax Received*")
 	return faxed
 
 /proc/CentcommStamp(var/obj/item/weapon/paper/P)

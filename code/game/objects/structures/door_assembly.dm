@@ -121,7 +121,7 @@
 /obj/structure/door_assembly/clockwork/clockworkify()
 	return
 
-/obj/structure/door_assembly/multi_tile/
+/obj/structure/door_assembly/multi_tile
 	icon = 'icons/obj/doors/door_assembly2x1.dmi'
 	dir = EAST
 	var/width = 1
@@ -220,7 +220,7 @@
 		else
 			to_chat(user, "<span class='notice'>You need more welding fuel.</span>")
 			return
-	else if(iswrench(W) && state == 0)
+	else if(W.is_wrench(user) && state == 0)
 		busy = 1
 		playsound(src, 'sound/items/Ratchet.ogg', 100, 1)
 		if(anchored)

@@ -36,6 +36,7 @@
 	var/slowdown = NO_SLOWDOWN // How much each piece of clothing is slowing you down. Works as a MULTIPLIER, i.e. 0.8 slowdown makes you go 20% faster, 1.5 slowdown makes you go 50% slower.
 
 	var/canremove = TRUE //Mostly for Ninja code at this point but basically will not allow the item to be removed if set to 0. /N
+	var/cant_remove_msg = " cannot be taken off!"
 	var/cant_drop = FALSE //If 1, can't drop it from hands!
 	var/cant_drop_msg = " sticks to your hand!"
 
@@ -244,6 +245,7 @@
 				return
 		//canremove==0 means that object may not be removed. You can still wear it. This only applies to clothing. /N
 		if(!canremove)
+			to_chat(user, "<span class='notice'>\The [src][cant_remove_msg]</span>")
 			return
 
 		user.u_equip(src,FALSE)
@@ -517,7 +519,7 @@
 						return CANNOT_EQUIP
 				return CAN_EQUIP
 			if(slot_belt)
-				if(!H.w_uniform)
+				if(!H.w_uniform && !isbelt(src))
 					if(!disable_warning)
 						to_chat(H, "<span class='warning'>You need a jumpsuit before you can attach this [name].</span>")
 					return CANNOT_EQUIP
@@ -527,7 +529,7 @@
 					if(automatic)
 						if(H.check_for_open_slot(src))
 							return CANNOT_EQUIP
-					if(H.belt.canremove && !istype(H.belt, /obj/item/weapon/storage/belt))
+					if(H.belt.canremove)
 						return CAN_EQUIP_BUT_SLOT_TAKEN
 					else
 						return CANNOT_EQUIP
@@ -845,21 +847,24 @@
 		return CANNOT_EQUIP //Unsupported slot
 		//END GRINCH
 
-/obj/item/can_pickup(mob/living/user)
+/obj/item/can_pickup(mob/living/user, var/actually_picking_up = TRUE, var/silent = FALSE)
 	if(!(user) || !isliving(user)) //BS12 EDIT
 		return FALSE
-	if(prepickup(user))
+	if(actually_picking_up && prepickup(user))
 		return FALSE
 	if(user.incapacitated() || !Adjacent(user))
 		return FALSE
 	if((!iscarbon(user) && !isMoMMI(user)) && !ishologram(user) && !isgrinch(user) || isbrain(user)) //Is not a carbon being, MoMMI, advanced hologram, or is a brain
-		to_chat(user, "You can't pick things up!")
+		if(!silent)
+			to_chat(user, "You can't pick things up!")
 		return FALSE
 	if(anchored) //Object isn't anchored
-		to_chat(user, "<span class='warning'>You can't pick that up!</span>")
+		if(!silent)
+			to_chat(user, "<span class='warning'>You can't pick that up!</span>")
 		return FALSE
 	if(!istype(loc, /turf) && !is_holder_of(user, src)) //Object is not on a turf
-		to_chat(user, "<span class='warning'>You can't pick that up!</span>")
+		if(!silent)
+			to_chat(user, "<span class='warning'>You can't pick that up!</span>")
 		return FALSE
 	return TRUE
 
@@ -950,7 +955,7 @@
 			return FALSE
 		if (prob(50 - round(damage / 3)))
 			visible_message("<span class='borange'>[loc] blocks \the [blocked] with \the [src]!</span>")
-			if(isatommovable(blocked))
+			if(ismovable(blocked))
 				var/atom/movable/M = blocked
 				M.throwing = FALSE
 			return TRUE
@@ -1338,6 +1343,9 @@ var/global/list/image/blood_overlays = list()
 /obj/item/proc/on_mousedrop_to_inventory_slot()
 	return
 
+/obj/item/proc/stealthy(var/mob/living/carbon/human/H)
+	return H.isGoodPickpocket()
+
 /obj/item/proc/can_be_stored(var/obj/item/weapon/storage/S)
 	return TRUE
 
@@ -1407,11 +1415,18 @@ var/global/list/image/blood_overlays = list()
 /obj/item/proc/is_screwdriver(var/mob/user)
 	return FALSE
 
+/obj/item/proc/is_wrench(var/mob/user)
+	return FALSE
+
 //This proc will be called when the person holding or equipping it talks.
 /obj/item/proc/affect_speech(var/datum/speech/speech, var/mob/living/L)
 	return
 
 /////// DISEASE STUFF //////////////////////////////////////////////////////////////////////////
+
+/obj/item/clothing/suitable_colony()
+	return pressure_resistance > ONE_ATMOSPHERE
+
 //Called by attack_hand(), transfers diseases between the mob and the item
 /obj/item/proc/disease_contact(var/mob/living/M,var/bodypart = null)
 	//first let's try to infect them with our viruses
@@ -1422,20 +1437,23 @@ var/global/list/image/blood_overlays = list()
 	if (!bodypart)//no bodypart specified? that should mean we're being held.
 		bodypart = HANDS
 	//secondly, do they happen to carry contact-spreading viruses themselves?
-	var/list/contact_diseases = filter_disease_by_spread(M.virus2,required = SPREAD_CONTACT)
+	var/list/contact_diseases = filter_disease_by_spread(M.virus2,required = SPREAD_CONTACT | SPREAD_COLONY)
 	if (contact_diseases?.len)
 		//if so are their hands protected?
-		if (!M.check_contact_sterility(bodypart))
-			for (var/ID in contact_diseases)
-				var/datum/disease2/disease/D = contact_diseases[ID]
+		var/block = M.check_contact_sterility(bodypart)
+		for (var/ID in contact_diseases)
+			var/datum/disease2/disease/D = contact_diseases[ID]
+			if(attempt_colony(src,D,"from being touched by [M]"))
+			else if(!block)
 				infect_disease2(D, notes="(Contact, from being touched by [M])")
-
 
 	//spreading of blood-spreading diseases to items is handled by add_blood()
 
 //Called by disease_contact(), trying to infect people who pick us up
 /obj/item/proc/infection_attempt(var/mob/living/perp,var/datum/disease2/disease/D,var/bodypart = null)
 	if (!istype(D))
+		return
+	if(attempt_colony(perp,D,"from picking up \a [src]"))
 		return
 	if (src in perp.held_items)
 		bodypart = HANDS

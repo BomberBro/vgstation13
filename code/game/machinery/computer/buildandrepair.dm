@@ -218,6 +218,10 @@
 	name = "Circuit Board (Pod Bay R&D Console)"
 	desc = "A circuit board for running a R&D console for the Pod Bay."
 	build_path = /obj/machinery/computer/rdconsole/pod
+/obj/item/weapon/circuitboard/rdconsole/derelict
+	name = "Circuit Board (Derelict R&D Console)"
+	desc = "A circuit board for running a R&D console for the Derelict."
+	build_path = /obj/machinery/computer/rdconsole/derelict
 
 /obj/item/weapon/circuitboard/mecha_control
 	name = "Circuit Board (Exosuit Control Console)"
@@ -384,7 +388,7 @@
 /obj/structure/computerframe/attackby(obj/item/P as obj, mob/user as mob)
 	switch(state)
 		if(0)
-			if(iswrench(P) && wrenchAnchor(user))
+			if(P.is_wrench(user) && wrenchAnchor(user))
 				src.state = 1
 				return 1
 			if(iswelder(P))
@@ -400,7 +404,7 @@
 					qdel(src)
 				return 1
 		if(1)
-			if(iswrench(P) && wrenchAnchor(user))
+			if(P.is_wrench(user) && wrenchAnchor(user))
 				src.state = 0
 				return 1
 			if(istype(P, /obj/item/weapon/circuitboard) && !circuit)

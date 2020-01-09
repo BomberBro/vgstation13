@@ -9,6 +9,8 @@
 
 	maxHealth = 75
 	health = 75
+	universal_speak = 1
+	universal_understand = 1
 
 	held_items = list()
 
@@ -26,6 +28,13 @@
 
 /mob/living/carbon/complex/gondola/say()
 	return
+
+/mob/living/carbon/complex/gondola/cult/New() //fug.....
+	..()
+	icon_state_standing = pick("gondola_c","gondola_c_tome")
+	icon_state_lying = "[icon_state_standing]_lying"
+	icon_state_dead = "gondola_skull"
+
 
 //Basically walking media receivers
 /mob/living/carbon/complex/gondola/radio
@@ -147,3 +156,12 @@
 		if(M && M.client)
 			M.update_music()
 	master_area=null
+
+/mob/living/carbon/complex/gondola/cultify()
+	var/mob/living/carbon/complex/gondola/cult/fug = new (get_turf(src))
+	if(mind)
+		mind.transfer_to(fug)
+	qdel(src)
+
+/mob/living/carbon/complex/gondola/cult/cultify()
+	return

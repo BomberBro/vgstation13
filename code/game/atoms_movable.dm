@@ -19,7 +19,7 @@
 	var/pass_flags = 0
 
 	var/sound_override = 0 //Do we make a sound when bumping into something?
-	var/hard_deleted = 0
+	var/hard_deleted
 	var/pressure_resistance = ONE_ATMOSPHERE
 	var/obj/effect/overlay/chain/tether = null
 	var/tether_pull = 0
@@ -55,6 +55,8 @@
 
 	var/ignore_blocking = 0
 
+	var/last_explosion_push = 0
+
 /atom/movable/New()
 	. = ..()
 	if((flags & HEAR) && !ismob(src))
@@ -68,8 +70,9 @@
 	on_moved = new("owner"=src)
 
 /atom/movable/Destroy()
-	gcDestroyed = "Bye, world!"
-	tag = null
+	var/turf/T = loc
+	if (opacity && istype(T))
+		T.reconsider_lights()
 
 	if(materials)
 		returnToPool(materials)
@@ -111,34 +114,13 @@
 
 	..()
 
-/proc/delete_profile(var/type, code = 0)
-	if(!ticker || ticker.current_state < 3)
-		return
-	if(code == 0)
-		if (!("[type]" in del_profiling))
-			del_profiling["[type]"] = 0
-
-		del_profiling["[type]"] += 1
-	else if(code == 1)
-		if (!("[type]" in ghdel_profiling))
-			ghdel_profiling["[type]"] = 0
-
-		ghdel_profiling["[type]"] += 1
-	else
-		if (!("[type]" in gdel_profiling))
-			gdel_profiling["[type]"] = 0
-
-		gdel_profiling["[type]"] += 1
-		soft_dels += 1
-
 /atom/movable/Del()
 	if (gcDestroyed)
-
 		if (hard_deleted)
 			delete_profile("[type]", 1)
 		else
-			garbageCollector.dequeue("\ref[src]") // hard deletions have already been handled by the GC queue.
 			delete_profile("[type]", 2)
+
 	else // direct del calls or nulled explicitly.
 		delete_profile("[type]", 0)
 		Destroy()
@@ -199,7 +181,7 @@
 		return
 
 	//We always split up movements into cardinals for issues with diagonal movements.
-	if(loc != NewLoc)
+	if(Dir || (loc != NewLoc))
 		if (!(Dir & (Dir - 1))) //Cardinal move
 			. = ..()
 		else //Diagonal move, split it into cardinal moves
@@ -394,10 +376,7 @@
 
 /atom/movable/proc/recycle(var/datum/materials/rec)
 	if(materials)
-		for(var/matid in materials.storage)
-			var/datum/material/material = materials.getMaterial(matid)
-			rec.addAmount(matid, materials.storage[matid] / material.cc_per_sheet) //the recycler's material is read as 1 = 1 sheet
-			materials.storage[matid] = 0
+		rec.addFrom(materials, TRUE)
 		return 1
 	return 0
 
@@ -1007,8 +986,8 @@
 		return 0
 	var/list/params_list = params2list(params)
 	if(clamp)
-		pixel_x = Clamp(base_pixx + text2num(params_list["icon-x"]) - WORLD_ICON_SIZE/2, -WORLD_ICON_SIZE/2, WORLD_ICON_SIZE/2)
-		pixel_y = Clamp(base_pixy + text2num(params_list["icon-y"]) - WORLD_ICON_SIZE/2, -WORLD_ICON_SIZE/2, WORLD_ICON_SIZE/2)
+		pixel_x = clamp(base_pixx + text2num(params_list["icon-x"]) - WORLD_ICON_SIZE/2, -WORLD_ICON_SIZE/2, WORLD_ICON_SIZE/2)
+		pixel_y = clamp(base_pixy + text2num(params_list["icon-y"]) - WORLD_ICON_SIZE/2, -WORLD_ICON_SIZE/2, WORLD_ICON_SIZE/2)
 	else
 		pixel_x = base_pixx + text2num(params_list["icon-x"]) - WORLD_ICON_SIZE/2
 		pixel_y = base_pixy + text2num(params_list["icon-y"]) - WORLD_ICON_SIZE/2

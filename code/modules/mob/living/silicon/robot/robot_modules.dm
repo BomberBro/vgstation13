@@ -470,6 +470,7 @@
 /obj/item/weapon/robot_module/miner
 	name = "supply robot module"
 	module_holder = "miner"
+	quirk_flags = MODULE_CAN_CLOSE_CLOSETS
 	networks = list(CAMERANET_MINE)
 	radio_key = /obj/item/device/encryptionkey/headset_mining
 	sprites = list(
@@ -500,6 +501,7 @@
 	modules += new /obj/item/weapon/gun/energy/kinetic_accelerator/cyborg(src)
 	modules += new /obj/item/weapon/gripper/no_use/inserter(src)
 	modules += new /obj/item/device/destTagger/cyborg(src)
+	modules += new /obj/item/weapon/storage/bag/clipboard(src)
 	modules += new /obj/item/device/gps/cyborg(src)
 	var/obj/item/stack/package_wrap/W = new /obj/item/stack/package_wrap(src)
 	W.amount = SUPPLY_MAX_WRAP
@@ -586,6 +588,7 @@
 		"Marina" = "marinaCB",
 		"#41" = "servbot-combat",
 		"Kodiak - 'Grizzly'" = "kodiak-combat",
+		"Sleek" = "sleekcombat",
 		"R34 - WAR8a 'Chesty'" = "chesty"
 		)
 	speed_modifier = CYBORG_COMBAT_SPEED_MODIFIER

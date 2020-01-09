@@ -536,7 +536,7 @@ Class Procs:
 	user.visible_message("[user.name] starts to [state - 1 ? "unweld": "weld" ] the [src] [state - 1 ? "from" : "to"] the floor.", \
 		"You start to [state - 1 ? "unweld": "weld" ] the [src] [state - 1 ? "from" : "to"] the floor.", \
 		"You hear welding.")
-	if (WT.do_weld(user, src,20, 0))
+	if (WT.do_weld(user, src,20, 1))
 		if(gcDestroyed)
 			return -1
 		switch(state)
@@ -552,7 +552,6 @@ Class Procs:
 							)
 		return 1
 	else
-		to_chat(user, "<span class='rose'>You need more welding fuel to complete this task.</span>")
 		return -1
 
 /**
@@ -586,7 +585,7 @@ Class Procs:
 			emag(user)
 			return
 
-	if(iswrench(O) && wrenchable()) //make sure this is BEFORE the fixed2work check
+	if(O.is_wrench(user) && wrenchable()) //make sure this is BEFORE the fixed2work check
 		if(!panel_open)
 			if(state == 2 && src.machine_flags & WELD_FIXED) //prevent unanchoring welded machinery
 				to_chat(user, "\The [src] has to be unwelded from the floor first.")
@@ -624,8 +623,11 @@ Class Procs:
 		return to_chat(user, "<span class='warning'>\The [src] must be anchored first!</span>")
 
 	if(istype(O, /obj/item/device/paicard) && machine_flags & WIREJACK)
-		for(var/mob/M in O)
-			wirejack(M)
+		var/obj/item/device/paicard/P = O
+		if(!P.pai)
+			return 1
+		if(wirejack(P.pai))
+			to_chat(user, "<span class='notice'>Wirejack engaged on \the [src].</span>")
 		return 1
 
 	if(istype(O, /obj/item/weapon/storage/bag/gadgets/part_replacer))

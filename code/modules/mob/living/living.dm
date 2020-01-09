@@ -18,6 +18,9 @@
 
 	immune_system = new (src)
 
+	on_resist = new(owner = src)
+	on_life = new(owner = src)
+
 /mob/living/Destroy()
 	for(var/mob/living/silicon/robot/mommi/MoMMI in player_list)
 		for(var/image/I in static_overlays)
@@ -37,6 +40,18 @@
 	if(BrainContainer)
 		qdel(BrainContainer)
 		BrainContainer = null
+
+	if(immune_system)
+		qdel(immune_system)
+		immune_system = null
+
+	if(on_resist)
+		qdel(on_resist)
+		on_resist = null
+
+	if(on_life)
+		qdel(on_life)
+		on_life = null
 
 	. = ..()
 
@@ -790,18 +805,6 @@ Thanks.
 /mob/living
 	var/event/on_resist
 
-/mob/living/New()
-	. = ..()
-	on_resist = new(owner = src)
-	on_life = new(owner = src)
-
-/mob/living/Destroy()
-	. = ..()
-	qdel(on_resist)
-	on_resist = null
-	qdel(on_life)
-	on_life = null
-
 /mob/living/verb/resist()
 	set name = "Resist"
 	set category = "IC"
@@ -936,7 +939,7 @@ Thanks.
 			L.visible_message("<span class='danger'>[L] resists!</span>")
 
 
-	if(L.locked_to)
+	if(L.locked_to && !L.isUnconscious())
 		//unbuckling yourself
 		if(istype(L.locked_to, /obj/structure/bed))
 			var/obj/structure/bed/B = L.locked_to
@@ -1082,7 +1085,7 @@ Thanks.
 				jailcell.break_out(L)
 		return
 
-	if(L.loc && istype(L.loc, /obj/structure/inflatable/shelter))
+	if((L.loc && istype(L.loc, /obj/structure/inflatable/shelter)) || (L.loc && istype(L.loc, /obj/structure/reagent_dispensers/cauldron/barrel)))
 		var/obj/O = L.loc
 		O.container_resist(L)
 
@@ -1759,8 +1762,7 @@ Thanks.
 		if(istype(src,/mob/living/carbon/human))
 			var/mob/living/carbon/human/H=src
 			throw_mult = H.species.throw_mult
-			if((M_HULK in H.mutations) || (M_STRONG in H.mutations))
-				throw_mult+=0.5
+			throw_mult += (H.get_strength()-1)/2 //For each level of strength above 1, add 0.5
 		item.throw_at(target, item.throw_range*throw_mult, item.throw_speed*throw_mult)
 		return THREW_SOMETHING
 
@@ -1888,16 +1890,17 @@ Thanks.
 
 ///////////////////////DISEASE STUFF///////////////////////////////////////////////////////////////////
 
-//For when we've already gone through clothing protections
-/mob/living/proc/assume_contact_diseases(var/list/disease_list,var/atom/source,var/bleeding=0)
+//Blocked is whether clothing prevented the spread of contact/blood
+/mob/living/proc/assume_contact_diseases(var/list/disease_list,var/atom/source,var/blocked=0,var/bleeding=0)
 	if (istype(disease_list) && disease_list.len > 0)
 		for(var/ID in disease_list)
 			var/datum/disease2/disease/V = disease_list[ID]
-			if (V.spread & SPREAD_CONTACT)
+			if(!blocked && V.spread & SPREAD_CONTACT)
 				infect_disease2(V, notes="(Contact, from [source])")
-			else if (bleeding && (V.spread & SPREAD_BLOOD))
+			else if(suitable_colony() && V.spread & SPREAD_COLONY)
+				infect_disease2(V, notes="(Colonized, from [source])")
+			else if(!blocked && bleeding && (V.spread & SPREAD_BLOOD))
 				infect_disease2(V, notes="(Blood, from [source])")
-
 
 //Called in Life() by humans (in handle_virus_updates.dm), monkeys and mice
 /mob/living/proc/find_nearby_disease()//only tries to find Contact and Blood spread diseases. Airborne ones are handled by breath_airborne_diseases()
@@ -1928,31 +1931,28 @@ Thanks.
 		block = check_contact_sterility(FEET)
 		bleeding = check_bodypart_bleeding(FEET)
 
-	if (!block)
-		var/list/viral_cleanable_types = list(
-			/obj/effect/decal/cleanable/blood,
-			/obj/effect/decal/cleanable/mucus,
-			/obj/effect/decal/cleanable/vomit,
-			)
+	var/list/viral_cleanable_types = list(
+		/obj/effect/decal/cleanable/blood,
+		/obj/effect/decal/cleanable/mucus,
+		/obj/effect/decal/cleanable/vomit,
+		)
 
-		for(var/obj/effect/decal/cleanable/C in T)
-			if (is_type_in_list(C,viral_cleanable_types))
-				assume_contact_diseases(C.virus2,C,bleeding)
+	for(var/obj/effect/decal/cleanable/C in T)
+		if (is_type_in_list(C,viral_cleanable_types))
+			assume_contact_diseases(C.virus2,C,block,bleeding)
 
-		for(var/obj/effect/rune/R in T)
-			assume_contact_diseases(R.virus2,R,bleeding)
+	for(var/obj/effect/rune/R in T)
+		assume_contact_diseases(R.virus2,R,block,bleeding)
 	return 0
 
 //This one is used for one-way infections, such as getting splashed with someone's blood due to clobbering them to death
 /mob/living/proc/oneway_contact_diseases(var/mob/living/L,var/block=0,var/bleeding=0)
-	if (!block)
-		assume_contact_diseases(L.virus2,L,bleeding)
+	assume_contact_diseases(L.virus2,L,block,bleeding)
 
 //This one is used for two-ways infections, such as hand-shakes, hugs, punches, people bumping into each others, etc
 /mob/living/proc/share_contact_diseases(var/mob/living/L,var/block=0,var/bleeding=0)
-	if (!block)
-		L.assume_contact_diseases(virus2,src,bleeding)
-		assume_contact_diseases(L.virus2,L,bleeding)
+	L.assume_contact_diseases(virus2,src,block,bleeding)
+	assume_contact_diseases(L.virus2,L,block,bleeding)
 
 //Called in Life() by humans (in handle_breath.dm), monkeys and mice
 /mob/living/proc/breath_airborne_diseases()//only tries to find Airborne spread diseases. Blood and Contact ones are handled by find_nearby_disease()

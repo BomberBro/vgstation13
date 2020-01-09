@@ -37,9 +37,9 @@
 	species_fit = list(GREY_SHAPED)
 
 /obj/item/clothing/under/sl_suit/armored
-	desc = "It's a very amish looking suit. This one looks armored."
+	desc = "It's a very amish looking suit. This one has a tag. It says \"Gorlex\" in cursive."
 	name = "armored amish suit"
-	armor = list(melee = 30, bullet = 20, laser = 10,energy = 5, bomb = 5, bio = 0, rad = 0)
+	armor = list(melee = 15, bullet = 5, laser = 5, energy = 0, bomb = 5, bio = 0, rad = 0)
 
 /obj/item/clothing/under/waiter
 	name = "waiter's outfit"
@@ -698,7 +698,7 @@
 	icon_state = "nr_uniform"
 	item_state = "nr_uniform"
 	_color = "nr_uniform"
-
+/*
 /obj/item/clothing/under/skelevoxsuit
 	name = "skelevox suit"
 	desc = "Feels like wearing literally nothing at all!"
@@ -707,7 +707,7 @@
 	_color = "vox-skelesuit"
 	species_restricted = list(VOX_SHAPED)
 	species_fit = list(VOX_SHAPED)
-
+*/
 /obj/item/clothing/under/rottensuit
 	name = "rotten suit"
 	desc = "This suit seems perfect for wearing underneath a disguise."
@@ -768,3 +768,36 @@
 	icon_state = "varsity"
 	item_state = "varsity"
 	_color = "varsity"
+
+/obj/item/clothing/under/galo
+	name = "delinquent clothes"
+	desc = "Yeah, Galo Sengen."
+	icon_state = "galo"
+	item_state = "galo"
+	_color = "galo"
+
+/obj/item/clothing/under/clownsuit
+	name = "formal clown outfit"
+	desc = "for clowns living in a society"
+	icon_state = "clownsuit"
+	item_state = "clownsuit"
+	_color = "clownsuit"
+	clothing_flags = ONESIZEFITSALL
+
+/obj/item/clothing/under/skelesuit
+	name = "skeleton suit"
+	desc = "Inside of everyone there is a spooky skinman waiting to escape"
+	icon_state = "skelesuit"
+	item_state = "skelesuit"
+	_color = "skelesuit"
+	species_fit = list(VOX_SHAPED)
+	clothing_flags = ONESIZEFITSALL
+	body_parts_covered = FULL_HEAD|BEARD|HIDEHAIR
+
+/obj/item/clothing/under/clownpsyche
+	name = "Psychedelic clown outfit"
+	desc = "Do you know the definition of insanity?"
+	icon_state = "clownpsyche"
+	item_state = "clownpsyche"
+	_color = "clownpsyche"
+	clothing_flags = ONESIZEFITSALL

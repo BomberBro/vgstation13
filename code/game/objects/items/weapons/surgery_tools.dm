@@ -425,16 +425,16 @@
 
 /obj/item/weapon/revivalprod/attack(mob/target,mob/user)
 	if(target.lying)
-		target.sleeping = max(0,target.sleeping-5)
+		target.sleeping = max(0,target.sleeping-10)
 		if(target.sleeping == 0)
 			target.resting = 0
 		target.AdjustParalysis(-3)
 		target.AdjustStunned(-3)
 		target.AdjustKnockdown(-3)
 		playsound(target, 'sound/weapons/thudswoosh.ogg', 50, 1, -1)
-		target.visible_message(
+		user.visible_message(
 			"<span class='notice'>[user] prods [target] trying to wake \him up!</span>",
-			"<span class='notice'>You prod [target] trying to wake \him up!</span>",
+			"<span class='notice'>You prod [target] trying to wake \him up!</span>"
 			)
 	else
 		return ..()
