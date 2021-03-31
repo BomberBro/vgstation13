@@ -1020,6 +1020,16 @@
 			for(var/client/C in clients)
 				C.images -= hitmarker
 
+/atom/proc/do_crit_animation()
+	spawn()
+		playsound(src, 'sound/effects/critz.ogg', 100, FALSE)
+		var/image/critz = image(icon='icons/effects/effects.dmi', loc=src, icon_state="critz")
+		for(var/client/C in clients)
+			C.images += critz
+		sleep(3)
+		for(var/client/C in clients)
+			C.images -= critz
+
 /atom/movable/proc/make_invisible(var/source_define, var/time, var/include_clothing)	//Makes things practically invisible, not actually invisible. Alpha is set to 1.
 	return invisibility || alpha <= 1	//already invisible
 

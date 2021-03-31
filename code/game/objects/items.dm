@@ -74,6 +74,9 @@
 	var/list/toolsounds = null //The sound(s) it makes when used as a tool.
 	var/toolspeed = 1 //When this item is used as a tool, multiply the delay of its do_after by this much.
 
+	var/crit_chance = 12.5 //fair and balanced
+	var/crit_modifier = 3
+
 /obj/item/proc/return_thermal_protection()
 	return return_cover_protection(body_parts_covered) * (1 - heat_conductivity)
 
