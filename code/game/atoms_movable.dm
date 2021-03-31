@@ -1024,9 +1024,10 @@
 	spawn()
 		playsound(src, 'sound/effects/critz.ogg', 100, FALSE)
 		var/image/critz = image(icon='icons/effects/effects.dmi', loc=src, icon_state="critz")
+		critz.pixel_y = 15
 		for(var/client/C in clients)
 			C.images += critz
-		sleep(3)
+		sleep(6)
 		for(var/client/C in clients)
 			C.images -= critz
 

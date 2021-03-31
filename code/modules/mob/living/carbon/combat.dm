@@ -59,11 +59,14 @@
 			add_logs(user, src, "ineffectively attacked", admin=1, object=I, addition="weapon force: [I.force]")
 			return TRUE
 	var/damage = run_armor_absorb(target_zone, I.damtype, I.force)
+	if(prob(I.crit_chance))
+		do_crit_animation()
+		damage *= I.crit_modifier
 	if(originator)
 		add_logs(originator, src, "damaged", admin=1, object=I, addition="DMG: [max(damage - armor, 0)]")
 	else
 		add_logs(user, src, "damaged", admin=1, object=I, addition="DMG: [max(damage - armor, 0)]")
-		
+
 	apply_damage(damage, I.damtype, affecting, armor , I.is_sharp(), used_weapon = I)
 	INVOKE_EVENT(on_touched, list("user" = src, "attacked by" = I))
 	return TRUE
